@@ -1,0 +1,156 @@
+# Cardputer ADV Media Jog
+
+**Give your Cardputer ADV a new job.**
+
+**No drivers. No companion apps. Just plug in and control.**
+
+The Cardputer ADV appears to the computer as a standard USB or Bluetooth LE keyboard and mouse (HID), so the operating system's built-in support is used. There is nothing to install on the computer. Standard HID still does not mean every computer, OS or application will work: see [Tested platforms](#tested-platforms-and-results) for what has actually been checked.
+
+![Cardputer ADV Media Jog: a Cardputer ADV and a Unit Encoder U135 with a large green knob on a 3D-printed base](images/Cardputer-ADV-Media-Jog.jpeg)
+
+## What it does
+
+Turn a large knob to control your computer:
+
+- **YOUTUBE profile:** step a paused YouTube video frame by frame, and play/pause with a press.
+- **SPINNER profile:** move the mouse pointer left and right; hold the knob to drag.
+- **USB or Bluetooth LE:** connect with a cable, or wirelessly. Switch between them on the Cardputer, without restarting.
+- **Everything is set on the Cardputer itself:** profile, transport and sensitivity are chosen with the Cardputer's own keyboard and screen, and kept across power cycles.
+- **Two more profiles are built in** (EDITING and CUSTOM, below), with less testing so far.
+
+The Cardputer's keyboard is used only for these local settings. **No Cardputer keystroke is ever sent to the computer.**
+
+## Why I built this
+
+Video editing isn't just for professionals anymore. But dedicated controllers with a jog dial are usually too expensive to buy on a whim. Cheap rotary knobs exist, yet many of them do little more than change the volume.
+
+So I wanted a controller that does real work, that is set up on the device itself, and that needs no special software on the computer.
+
+And I already had a Cardputer ADV.
+
+Turning something already on my desk into a new, genuinely useful tool turned out to be the fun part.
+
+## Hardware
+
+| Part | Notes |
+| --- | --- |
+| M5Stack **Cardputer ADV** | Tested. The original Cardputer (non-ADV) uses a different keyboard reader and is **not** tested. |
+| M5Stack **Unit Encoder (U135)** | Connected to the Cardputer's external Grove port (I²C, address 0x40). Connect it while the Cardputer is powered **off**. |
+| USB-C **data** cable | For USB use. Over Bluetooth LE it is only needed for power and charging. |
+| Optional: 3D-printed base (flat or 15° tilted) and jog dial | See [No 3D printer? No problem!](#no-3d-printer-no-problem) and [`hardware/`](hardware/). |
+
+## Installation
+
+The tested way is the **app-only firmware file**, uploaded through an app launcher that is already installed on the Cardputer and supports Wi-Fi upload.
+
+1. Download [`firmware/MediaJog_2a_2/MediaJog_2a_2.ino.bin`](firmware/MediaJog_2a_2/) and check it against [`SHA256SUMS.txt`](firmware/MediaJog_2a_2/SHA256SUMS.txt).
+2. Upload it with your launcher's Wi-Fi upload, then start it from the launcher.
+3. Connect the U135 (with the Cardputer off), power on and start the app.
+
+> **Keep your launcher:** install only the app-only `.ino.bin`, through the launcher.
+> - Do not write a merged image (`*.merged.bin`) to the device with a flashing tool: it contains a bootloader and a partition table.
+> - With this project's board package, the Arduino IDE's **Upload** also writes the bootloader and the partition table (per the board package's upload settings). That can replace your launcher.
+> - If you build from source, use **Export Compiled Binary** and install the resulting `.ino.bin` through the launcher.
+
+Details, building from source and recovery: [`docs/guide/installation.md`](docs/guide/installation.md). Other firmware in this repository: [`firmware/`](firmware/).
+
+## Connecting: USB or Bluetooth LE
+
+- **USB:** connect the Cardputer to the computer with a USB-C data cable. The screen shows `USB HID READY`.
+- **Bluetooth LE:**
+  1. Press `Fn + B` to open the **CONNECTION** screen, press `2` (BLE), then `ok` (Enter). Pressing the knob also applies.
+  2. Pair **"MediaJog BLE"** in the computer's Bluetooth settings. No PIN is needed.
+  3. The screen shows `BLE READY`.
+- **Switch back to USB:** `Fn + B`, `1`, `ok`. Close the screen without changing anything with `` ` `` (esc).
+
+The selected transport is restored at the next start. Only one transport sends at a time. When you switch, anything held (a key, a mouse button) is released first. If a release could not be confirmed, a red `!` appears next to the transport name in the top-right corner.
+
+## Using the profiles
+
+Select a profile with `Fn + 1` … `Fn + 4` on the Cardputer. The profile is saved.
+
+| Profile | Turn clockwise | Turn counterclockwise | Press the knob |
+| --- | --- | --- | --- |
+| `Fn + 1` **YOUTUBE** | `.` (next frame on a **paused** video) | `,` (previous frame) | `k` (play / pause) |
+| `Fn + 2` **SPINNER** | mouse pointer → right | mouse pointer → left | hold = left mouse button (drag) |
+| `Fn + 3` **EDITING** | Right Arrow | Left Arrow | Space |
+| `Fn + 4` **CUSTOM** | your key | your key | your key; **TAP** or **HOLD** |
+
+- **SPINNER sensitivity:** `Fn + ;` (up) and `Fn + .` (down), 14 steps.
+- **EDITING** sends common editing shortcuts. It is **not** tested with any video editor, and no compatibility is claimed.
+- **CUSTOM** is set up on the Cardputer with `Fn + S` (in Profile 4): an ordinary key with Ctrl / Shift / Alt / Command (GUI). The press can be TAP or HOLD; for example, HOLD Shift + turn selects text.
+  - SETUP画面のアルファベットはキー名として大文字で表示されます。実際に大文字を入力するには、Shift修飾キーを追加してください。
+  - (Letters on the SETUP screen are key names. To type a capital letter, add the Shift modifier.)
+
+More detail: [`docs/guide/controls.md`](docs/guide/controls.md).
+
+## Tested platforms and results
+
+Firmware **Stage 2a-2** (`firmware/MediaJog_2a_2`), tested by the author on real hardware:
+
+| OS | Connection | YOUTUBE | SPINNER |
+| --- | --- | --- | --- |
+| macOS (MacBook Pro, Apple Silicon) | USB | ✅ | ✅ mouse control |
+| macOS | Bluetooth LE | ✅ | ✅ pointer, drag and release |
+| Windows | USB | ✅ | ✅ pointer |
+| ChromeOS | USB | ✅ | ✅ pointer |
+
+**Also checked on macOS:**
+- switching USB ⇄ Bluetooth LE without a restart, including switching away from Bluetooth LE while dragging;
+- automatic Bluetooth LE reconnection after turning the Mac's Bluetooth off and on, and after restarting the Cardputer (once each);
+- USB reconnection after restarting the Cardputer in USB mode.
+
+**Not tested yet:**
+- Bluetooth LE on Windows and ChromeOS;
+- dragging on Windows and ChromeOS;
+- serious jog use in video editors such as Premiere Pro or DaVinci Resolve;
+- the EDITING and CUSTOM profiles on Stage 2a-2 (CUSTOM was tested over USB on the earlier USB-only firmware);
+- Linux distributions (ChromeOS is **not** taken as evidence for them);
+- long-term stability;
+- other computers and OS versions.
+
+**The original Cardputer** is not tested either.
+
+The test history is in [`docs/history/`](docs/history/).
+
+## No 3D printer? No problem!
+
+The custom enclosure is completely optional. You can use LEGO bricks, build your own mount, or simply use the components as they are.
+
+But take a look at the photo above. You might change your mind. 😉
+
+The print files are in [`hardware/`](hardware/):
+- a Bambu Studio project (`Cardputer-ADV-Media-Jog.3mf`) with a flat base, a 15° tilted base and the jog dial. This is what the author printed and used.
+- the same three parts as STL (`MediaJog_Base_A.stl` flat base, `MediaJog_Base_B.stl` 15° tilted base, `MediaJog_Dial.stl` jog dial). They were exported from the project and checked against it, but have **not** been printed.
+
+## Known limitations
+
+- **Bluetooth LE, at most 2 computers.** The Bluetooth stack stores a limited number of subscription records. Pairing a **third** computer can make it delete the pairing of the oldest other computer.
+- **Re-pairing after an update.** After updating from an earlier Bluetooth test firmware, the Mac kept "MediaJog BLE" but did not reconnect. Removing the device on the Mac and pairing again fixed it.
+  - The cause is **not determined**. It is **not** established that every update needs a new pairing: earlier updates kept the pairing.
+  - Do not go back to older Bluetooth firmware after installing Stage 2a-2. Its Bluetooth layout differs.
+- **First USB connection.** Once, USB stayed at `NOT MOUNTED` and the computer did not list the device at all, also after a restart with the cable connected. It worked after powering the Cardputer off and on. The cause and the exact recovery condition are **not determined**.
+- **USB unplug / replug while powered.** With earlier USB builds the screen could stay at `USB SUSPENDED`; powering the Cardputer off and on restored it. The root cause is unknown. The USB code is unchanged in Stage 2a-2.
+- **Pairing and devices.** Bluetooth LE works with one computer at a time. There is no "forget pairing" on the Cardputer yet.
+- **No boot-protocol keyboard.** It does not work in BIOS / firmware menus.
+- **Settings storage.** Settings are kept in the Cardputer's shared NVS storage under the app's own namespace. This firmware never erases NVS, but the Arduino core can erase it after certain storage errors.
+
+Troubleshooting: [`docs/guide/troubleshooting.md`](docs/guide/troubleshooting.md).
+
+## Technical documents and history
+
+- [`docs/technical/architecture.md`](docs/technical/architecture.md): how USB and Bluetooth LE HID share one firmware, profile handling, release rules, saved settings.
+- [`docs/technical/ble-gatt.md`](docs/technical/ble-gatt.md): the Bluetooth LE HID service, and why it is a fixed table.
+- [`docs/history/`](docs/history/): the full development and test records, stage by stage. Some of them are in Japanese.
+
+**Ideas for later** (not implemented): pairing management on the device, more profiles for specific applications, and other input modules for a modular controller. Nothing in this list is promised.
+
+## License and credits
+
+- **License:** all original project materials (firmware sources, 3D-print designs, documentation, photos) are released under the [MIT License](LICENSE), Copyright (c) 2026 kariagepompadour.
+- **Third-party material** keeps its own license and is not claimed as this project's:
+  - M5Stack's libraries (M5Unified, M5GFX, M5Unit-Encoder, M5Cardputer; MIT). M5Stack-derived code in this repository is covered by [`LICENSES/M5Stack-MIT.txt`](LICENSES/M5Stack-MIT.txt).
+  - The Arduino-ESP32 core (mixed licenses, including LGPL-2.1 and Apache-2.0).
+  - TinyUSB (MIT).
+  - Apache NimBLE / ESP-IDF Bluetooth (Apache-2.0).
+- **Credits:** concept, hardware design, 3D printing and real-device testing by **kariagepompadour**. AI tools (Anthropic's Claude for implementation, investigation and documentation; OpenAI's GPT for review) assisted the development. The author made the project decisions and did all hardware testing.
