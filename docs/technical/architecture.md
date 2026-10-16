@@ -1,6 +1,6 @@
-# Architecture (Stage 2a-2)
+# Architecture (Stage 2a-5)
 
-An overview of how the recommended firmware ([`firmware/MediaJog_2a_2`](../../firmware/MediaJog_2a_2/)) works. The full design and test records are in [`docs/history/`](../history/); the main ones are `STAGE_2A_DESIGN.md`, `STAGE_2A.md`, `STAGE_2A_2_DESIGN.md` and `STAGE_2A_2.md`.
+An overview of how the recommended firmware ([`firmware/MediaJog_2a_5`](../../firmware/MediaJog_2a_5/)) works. The transport and Bluetooth parts are unchanged since Stage 2a-2. The full design and test records are in [`docs/history/`](../history/); the main ones are `STAGE_2A_DESIGN.md`, `STAGE_2A.md`, `STAGE_2A_2_DESIGN.md`, `STAGE_2A_2.md`, `STAGE_2A_3_DESIGN.md`, `STAGE_2A_3.md`, `STAGE_2A_4.md` and `STAGE_2A_5.md`.
 
 ## One firmware, two transports
 
@@ -19,10 +19,11 @@ An overview of how the recommended firmware ([`firmware/MediaJog_2a_2`](../../fi
 ## Profiles and input
 
 - **Input:** the U135 is read over I²C. Rotation is counted in detents. A press is a TAP, or with CUSTOM HOLD a held key.
-- **Profiles:** YOUTUBE, SPINNER, EDITING and CUSTOM map these events to keys or mouse actions.
-  - Keyboard profiles queue events (a small queue, sent in order).
-  - SPINNER sends relative X movement, scaled by one of 14 sensitivity steps.
-- **Local keys:** the Cardputer's own keyboard only changes local settings (profile, sensitivity, CUSTOM setup, CONNECTION). Its keystrokes are never sent to the computer.
+- **Profiles:** YOUTUBE, SPINNER, EDITING, CUSTOM and C-SPINNER map these events to keys or mouse actions.
+  - Keyboard profiles queue events (a small queue, sent in order). With **KEY STEP** 2–10, one queue entry carries that many taps. When the knob is turned the other way, waiting taps of the old direction are removed (other events keep their order).
+  - SPINNER and C-SPINNER send relative X movement, scaled by one of 14 sensitivity steps; each has its own step. C-SPINNER can reverse the direction, and its knob press is a key (TAP / HOLD, through the keyboard queue) or a mouse button (HOLD, or TAP = one click released after the press report was confirmed).
+- **Local keys:** the Cardputer's own keyboard only changes local settings (profile, sensitivity / KEY STEP, CUSTOM and C-SPINNER setup, CONNECTION). Its keystrokes are never sent to the computer.
+- **Screen:** operation guides draw the operation in cyan and the description in white (Stage 2a-5, display only).
 
 ## Release rules (nothing stays pressed)
 
@@ -44,13 +45,14 @@ An overview of how the recommended firmware ([`firmware/MediaJog_2a_2`](../../fi
 
 ## Saved settings
 
-- **Where:** the Cardputer's NVS storage, under the app's own namespace `mediajog`. Two records, each with a magic, a version and a CRC-32:
-  - **settings:** profile, CUSTOM keys, sensitivity;
-  - **link:** the active transport.
+- **Where:** the Cardputer's NVS storage, under the app's own namespace `mediajog`. Three records, each with a magic, a version and a CRC-32:
+  - **settings** (`cfg`, unchanged since Stage 1e-4): profile 1–4, CUSTOM keys, SPINNER sensitivity;
+  - **link:** the active transport;
+  - **extension** (`ext`, since Stage 2a-3): the KEY STEPs, the C-SPINNER settings, and whether Profile 5 is active. Profile 5 is restored only if `cfg` still holds the profile it held when `ext` was written, so older firmware, which ignores `ext`, keeps working.
 - **When written:**
   - the profile and the transport at once;
-  - CUSTOM only on Save;
-  - the sensitivity 2 s after the last change;
+  - CUSTOM and C-SPINNER SETUP only on Save;
+  - the sensitivities and KEY STEPs 2 s after the last change;
   - nothing when the value is unchanged.
 - **Safety:**
   - A damaged or newer record is never overwritten silently.
@@ -59,5 +61,5 @@ An overview of how the recommended firmware ([`firmware/MediaJog_2a_2`](../../fi
 
 ## Status
 
-- **Main functions:** tested on real hardware (see the README).
+- **Main functions:** tested on real hardware (see the README). Stage 2a-5 differs from the hardware-tested Stage 2a-4 only in the screen colours.
 - **Not tested on hardware:** several paths, such as repeated switching, the owed-release `!` path, and HOLD over Bluetooth LE. They are listed in `STAGE_2A_2.md` §8.3.

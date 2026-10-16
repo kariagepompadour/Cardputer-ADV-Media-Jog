@@ -14,9 +14,10 @@ Turn a large knob to control your computer:
 
 - **YOUTUBE profile:** step a paused YouTube video frame by frame, and play/pause with a press.
 - **SPINNER profile:** move the mouse pointer left and right; hold the knob to drag.
+- **C-SPINNER profile:** a spinner you set up yourself: its own sensitivity, normal or reversed direction, and any key, modifier or mouse button on the knob press.
 - **USB or Bluetooth LE:** connect with a cable, or wirelessly. Switch between them on the Cardputer, without restarting.
-- **Everything is set on the Cardputer itself:** profile, transport and sensitivity are chosen with the Cardputer's own keyboard and screen, and kept across power cycles.
-- **Two more profiles are built in** (EDITING and CUSTOM, below), with less testing so far.
+- **Everything is set on the Cardputer itself:** profile, transport, sensitivity and key assignments are chosen with the Cardputer's own keyboard and screen, and kept across power cycles.
+- **Two more profiles are built in** (EDITING and CUSTOM, below).
 
 The Cardputer's keyboard is used only for these local settings. **No Cardputer keystroke is ever sent to the computer.**
 
@@ -43,7 +44,7 @@ Turning something already on my desk into a new, genuinely useful tool turned ou
 
 The tested way is the **app-only firmware file**, uploaded through an app launcher that is already installed on the Cardputer and supports Wi-Fi upload.
 
-1. Download [`firmware/MediaJog_2a_2/MediaJog_2a_2.ino.bin`](firmware/MediaJog_2a_2/) and check it against [`SHA256SUMS.txt`](firmware/MediaJog_2a_2/SHA256SUMS.txt).
+1. Download [`firmware/MediaJog_2a_5/MediaJog_2a_5.ino.bin`](firmware/MediaJog_2a_5/) and check it against [`SHA256SUMS.txt`](firmware/MediaJog_2a_5/SHA256SUMS.txt).
 2. Upload it with your launcher's Wi-Fi upload, then start it from the launcher.
 3. Connect the U135 (with the Cardputer off), power on and start the app.
 
@@ -52,7 +53,7 @@ The tested way is the **app-only firmware file**, uploaded through an app launch
 > - With this project's board package, the Arduino IDE's **Upload** also writes the bootloader and the partition table (per the board package's upload settings). That can replace your launcher.
 > - If you build from source, use **Export Compiled Binary** and install the resulting `.ino.bin` through the launcher.
 
-Details, building from source and recovery: [`docs/guide/installation.md`](docs/guide/installation.md). Other firmware in this repository: [`firmware/`](firmware/).
+This version reads the settings saved by the earlier versions in this repository (by design; carrying them over was not tested separately). Details, building from source and recovery: [`docs/guide/installation.md`](docs/guide/installation.md). Other firmware in this repository: [`firmware/`](firmware/).
 
 ## Connecting: USB or Bluetooth LE
 
@@ -67,7 +68,7 @@ The selected transport is restored at the next start. Only one transport sends a
 
 ## Using the profiles
 
-Select a profile with `Fn + 1` … `Fn + 4` on the Cardputer. The profile is saved.
+Select a profile with `Fn + 1` … `Fn + 5` on the Cardputer. The profile is saved.
 
 | Profile | Turn clockwise | Turn counterclockwise | Press the knob |
 | --- | --- | --- | --- |
@@ -75,18 +76,52 @@ Select a profile with `Fn + 1` … `Fn + 4` on the Cardputer. The profile is sav
 | `Fn + 2` **SPINNER** | mouse pointer → right | mouse pointer → left | hold = left mouse button (drag) |
 | `Fn + 3` **EDITING** | Right Arrow | Left Arrow | Space |
 | `Fn + 4` **CUSTOM** | your key | your key | your key; **TAP** or **HOLD** |
+| `Fn + 5` **C-SPINNER** | mouse pointer → right (or left, if reversed) | mouse pointer → left (or right) | your choice: key, mouse left / right or none; **TAP** or **HOLD** |
 
-- **SPINNER sensitivity:** `Fn + ;` (up) and `Fn + .` (down), 14 steps.
+- **Sensitivity and KEY STEP:** `Fn + ;` (up) and `Fn + .` (down).
+  - In **SPINNER** and **C-SPINNER**: the pointer movement per knob step, 14 steps from 1 to 128 (default 8). Each of the two profiles keeps its own value.
+  - In **YOUTUBE**, **EDITING** and **CUSTOM**: **KEY STEP**, how many key presses one knob step sends (1–10, default 1), one value per profile. When you reverse direction, presses still waiting in the other direction are dropped, so the knob follows you.
 - **EDITING** sends common editing shortcuts. It is **not** tested with any video editor, and no compatibility is claimed.
 - **CUSTOM** is set up on the Cardputer with `Fn + S` (in Profile 4): an ordinary key with Ctrl / Shift / Alt / Command (GUI). The press can be TAP or HOLD; for example, HOLD Shift + turn selects text.
   - SETUP画面のアルファベットはキー名として大文字で表示されます。実際に大文字を入力するには、Shift修飾キーを追加してください。
   - (Letters on the SETUP screen are key names. To type a capital letter, add the Shift modifier.)
+- **On-screen help:** in the help lines, the key to press is shown in **cyan** and what it does in **white** (for example `Fn+S` in cyan, `: SETUP` in white).
 
 More detail: [`docs/guide/controls.md`](docs/guide/controls.md).
 
+### C-SPINNER (`Fn + 5`)
+
+A second spinner whose settings are all yours. It works over USB and Bluetooth LE, and leaves SPINNER (`Fn + 2`) unchanged.
+
+- **Turning the knob** moves the mouse pointer horizontally (relative X movement).
+- **Sensitivity:** the same 14 steps as SPINNER, kept separately. `Fn + ;` / `Fn + .` in Profile 5 change only C-SPINNER.
+- **Setup:** `Fn + S` in Profile 5. Choose a row with `1`–`4` or by turning the knob; press the knob to change it. `ok` (Enter) saves, `` ` `` (esc) cancels.
+
+  | Row | Setting |
+  | --- | --- |
+  | `1 SENS` | sensitivity |
+  | `2 DIR` | NORMAL or REVERSE |
+  | `3 BTN` | the knob press: a key (with Ctrl / Shift / Alt / Command, or modifiers alone), `Fn + L` mouse left, `Fn + R` mouse right, `del` none |
+  | `4 MODE` | **TAP**: one key press or one click per knob press. **HOLD**: held while you hold the knob (for example, drag with the mouse button, or Shift) |
+
+- **Defaults:** sensitivity 8, NORMAL, mouse left, HOLD: the same as SPINNER's defaults.
+- **Saved** on the Cardputer: SETUP on Save, the sensitivity 2 s after the last change. Profile 5 is restored at the next start.
+- With a key on HOLD, the computer reacts as to any held key: for example, macOS may show its accent menu, and other inputs may repeat the character. Use TAP for a single press.
+
 ## Tested platforms and results
 
-Firmware **Stage 2a-2** (`firmware/MediaJog_2a_2`), tested by the author on real hardware:
+Tested by the author on real hardware. **Stage 2a-5** (the firmware above) is Stage 2a-4 with colour-coded on-screen help; its control functions are the same as Stage 2a-4's, which were tested as follows.
+
+**Stage 2a-4** on macOS (MacBook Pro, Apple Silicon):
+
+| Connection | Tested |
+| --- | --- |
+| Bluetooth LE | SPINNER and C-SPINNER pointer; C-SPINNER at sensitivity 8 and 64; the two sensitivities independent; REVERSE (also after a profile switch and a power cycle); mouse left / right, TAP (three right clicks in a row; no drag) and HOLD (drag); key A (TAP, HOLD), Shift + A, none; settings kept after a power cycle |
+| USB | C-SPINNER pointer |
+
+**Stage 2a-3** (KEY STEP), on macOS: KEY STEP 10 over USB; fast turning with a sudden reversal over Bluetooth LE and USB (the knob follows the reversal); KEY STEP 1 over Bluetooth LE; CUSTOM (Right / Left, HOLD Shift) turning while holding over Bluetooth LE.
+
+**Stage 2a-2**, tested earlier:
 
 | OS | Connection | YOUTUBE | SPINNER |
 | --- | --- | --- | --- |
@@ -95,16 +130,15 @@ Firmware **Stage 2a-2** (`firmware/MediaJog_2a_2`), tested by the author on real
 | Windows | USB | ✅ | ✅ pointer |
 | ChromeOS | USB | ✅ | ✅ pointer |
 
-**Also checked on macOS:**
+**Also checked on macOS (Stage 2a-2):**
 - switching USB ⇄ Bluetooth LE without a restart, including switching away from Bluetooth LE while dragging;
 - automatic Bluetooth LE reconnection after turning the Mac's Bluetooth off and on, and after restarting the Cardputer (once each);
 - USB reconnection after restarting the Cardputer in USB mode.
 
 **Not tested yet:**
-- Bluetooth LE on Windows and ChromeOS;
+- C-SPINNER and KEY STEP on Windows and ChromeOS; Bluetooth LE on Windows and ChromeOS;
 - dragging on Windows and ChromeOS;
 - serious jog use in video editors such as Premiere Pro or DaVinci Resolve;
-- the EDITING and CUSTOM profiles on Stage 2a-2 (CUSTOM was tested over USB on the earlier USB-only firmware);
 - Linux distributions (ChromeOS is **not** taken as evidence for them);
 - long-term stability;
 - other computers and OS versions.
@@ -112,6 +146,23 @@ Firmware **Stage 2a-2** (`firmware/MediaJog_2a_2`), tested by the author on real
 **The original Cardputer** is not tested either.
 
 The test history is in [`docs/history/`](docs/history/).
+
+### Example: Arkanoid in the Internet Archive's web MAME
+
+[Arkanoid Tournament (US)](https://archive.org/details/arcade_arkatour) in the Internet Archive's browser version of MAME can be played with the knob.
+
+- **Tested with:** Mac, Google Chrome, Bluetooth LE, Stage 2a-4, **SPINNER (`Fn + 2`) at sensitivity 64 (12/14)**. C-SPINNER was **not** tried with this game.
+- **Result:** the paddle follows the knob left and right at a practical speed. The movement is slightly stepped; the cause is not known.
+- **Mouse input must be enabled in the web MAME.** Without it, the pointer moves but the paddle does not. What worked:
+  1. Open the game page (reload it if it is already open). Do not start the game yet.
+  2. In Chrome's address bar, run:
+     ```
+     javascript:MAMELoader.extraArgs=(z)=>({extra_mame_args:['-mouse']});AJS.emulate()
+     ```
+     Chrome may remove `javascript:` when you paste. If so, type `javascript:` by hand and paste the rest.
+  3. The game starts with MAME's `-mouse` option, and the knob moves the paddle.
+- **Getting the pointer back:** while mouse input is enabled, the pointer is captured by the game. Press **Esc** once to release it.
+- This relies on the Internet Archive's page code (found in Alexander Pruss, ["Two tweaks for Internet Arcade games on archive.org"](https://alexanderpruss.blogspot.com/2023/02/two-tweaks-for-internet-arcade-games-on.html)). It may stop working at any time. Play only games you are allowed to use.
 
 ## No 3D printer? No problem!
 
@@ -126,11 +177,13 @@ The print files are in [`hardware/`](hardware/):
 ## Known limitations
 
 - **Bluetooth LE, at most 2 computers.** The Bluetooth stack stores a limited number of subscription records. Pairing a **third** computer can make it delete the pairing of the oldest other computer.
-- **Re-pairing after an update.** After updating from an earlier Bluetooth test firmware, the Mac kept "MediaJog BLE" but did not reconnect. Removing the device on the Mac and pairing again fixed it.
-  - The cause is **not determined**. It is **not** established that every update needs a new pairing: earlier updates kept the pairing.
-  - Do not go back to older Bluetooth firmware after installing Stage 2a-2. Its Bluetooth layout differs.
+- **Bluetooth LE: connected, but nothing arrives.** Twice during development the Cardputer showed `BLE READY` and counted the inputs as sent, but nothing reached the Mac. Once, removing the device on the Mac and pairing again fixed it; in the other case it later worked again. The cause is **not determined**.
+- **Re-pairing after an update.** After some firmware updates the Mac kept "MediaJog BLE" but did not reconnect. Removing the device on the Mac and pairing again fixed it.
+  - The cause is **not determined**. It is **not** established that every update needs a new pairing: other updates kept the pairing.
+  - Do not go back to Bluetooth firmware older than Stage 2a-2. Its Bluetooth layout differs.
+- **KEY STEP over Bluetooth LE.** With a high KEY STEP and fast turning, Bluetooth LE cannot send the presses as fast as they are made; they queue up and arrive late (a reversal drops the waiting ones). Over USB this was not seen.
 - **First USB connection.** Once, USB stayed at `NOT MOUNTED` and the computer did not list the device at all, also after a restart with the cable connected. It worked after powering the Cardputer off and on. The cause and the exact recovery condition are **not determined**.
-- **USB unplug / replug while powered.** With earlier USB builds the screen could stay at `USB SUSPENDED`; powering the Cardputer off and on restored it. The root cause is unknown. The USB code is unchanged in Stage 2a-2.
+- **USB unplug / replug while powered.** With earlier USB builds the screen could stay at `USB SUSPENDED`; powering the Cardputer off and on restored it. The root cause is unknown. The USB code is unchanged since then.
 - **Pairing and devices.** Bluetooth LE works with one computer at a time. There is no "forget pairing" on the Cardputer yet.
 - **No boot-protocol keyboard.** It does not work in BIOS / firmware menus.
 - **Settings storage.** Settings are kept in the Cardputer's shared NVS storage under the app's own namespace. This firmware never erases NVS, but the Arduino core can erase it after certain storage errors.

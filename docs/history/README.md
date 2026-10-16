@@ -3,7 +3,7 @@
 These are the **development and test records**, copied unchanged from the development repository. They are kept for transparency and for anyone interested in how the firmware was built and tested. For using the project, start with the [README](../../README.md) and [`docs/guide/`](../guide/).
 
 **Please note:**
-- **Folder names refer to the development repository.** The records mention firmware folders such as `MediaJog_1a/` … `MediaJog_2a/`, `MediaJog_BLE_1_r4/` or `MediaJog_BLE_M1/`, and paths such as `<stage>/build/<stage>.ino.bin`. This public repository contains only `firmware/MediaJog_2a_2`, `firmware/MediaJog_1e_4` and `firmware/MediaJog_BLE_B1` (source only). Checksums quoted in the records are the same as in `firmware/*/SHA256SUMS.txt`.
+- **Folder names refer to the development repository.** The records mention firmware folders such as `MediaJog_1a/` … `MediaJog_2a/`, `MediaJog_BLE_1_r4/` or `MediaJog_BLE_M1/`, and paths such as `<stage>/build/<stage>.ino.bin`. This public repository contains only `firmware/MediaJog_2a_5`, `firmware/MediaJog_2a_2`, `firmware/MediaJog_1e_4` and `firmware/MediaJog_BLE_B1` (source only). Intermediate builds named in the records (for example `MediaJog_2a_3`, `MediaJog_2a_3_d1`, `MediaJog_2a_3_r2`, `MediaJog_2a_4`) are not published; `MediaJog_2a_5` is `MediaJog_2a_4` with colour-coded on-screen help. Checksums quoted in the records are the same as in `firmware/*/SHA256SUMS.txt`.
 - **Some records are partly in Japanese**, in particular `REPORT.md`.
 - **Records are append-only.** A statement made early may be corrected in a later section of the same file. The latest section wins.
 - **"Edgar"** is the project's AI reviewer (OpenAI GPT); "Claude" implemented and documented with the author.
@@ -18,3 +18,6 @@ These are the **development and test records**, copied unchanged from the develo
 | `BLE_M1.md` | Bluetooth mouse: the library limitation and the second-service attempt |
 | `BLE_B1_DESIGN.md`, `BLE_B1.md` | The fixed GATT table (BLE-B1) |
 | `STAGE_2A_2_DESIGN.md`, `STAGE_2A_2.md` | Stage 2a-2: integration, host tests, hardware results, known open issues |
+| `STAGE_2A_3_DESIGN.md`, `STAGE_2A_3.md` | Stage 2a-3: KEY STEP, Bluetooth LE lag measurements, the reversal purge (r2), the open "`BLE READY` without input" issue, the web MAME Arkanoid test |
+| `STAGE_2A_4.md` | Stage 2a-4: C-SPINNER (Profile 5), host tests, hardware results (§11) |
+| `STAGE_2A_5.md` | Stage 2a-5: colour-coded on-screen help (display only) |

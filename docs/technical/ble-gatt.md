@@ -1,6 +1,6 @@
 # Bluetooth LE HID: the fixed GATT table
 
-Stage 2a-2 registers its Bluetooth LE HID services as a **fixed NimBLE GATT table**. This page explains why, and what the table contains. Full records: `BLE_M1.md`, `BLE_B1_DESIGN.md` and `BLE_B1.md` in [`docs/history/`](../history/).
+Stage 2a-2 (and every later stage up to 2a-5, unchanged) registers its Bluetooth LE HID services as a **fixed NimBLE GATT table**. This page explains why, and what the table contains. Full records: `BLE_M1.md`, `BLE_B1_DESIGN.md` and `BLE_B1.md` in [`docs/history/`](../history/).
 
 ## Why not the Arduino BLE HID class
 
@@ -45,4 +45,4 @@ These keep the table the same as the Bluetooth test firmware that passed on hard
 ## Consequences
 
 - **Limit of 2 hosts.** Each paired computer stores 3 subscription records (keyboard, mouse, battery). The stack keeps at most 8. Pairing a third computer can make the stack delete the oldest other pairing, so **at most 2 Bluetooth LE computers** are supported.
-- **Firmware with a different table looks like a different device** to a bonded computer. Do not go back to older Bluetooth firmware after installing Stage 2a-2.
+- **Firmware with a different table looks like a different device** to a bonded computer. Do not go back to older Bluetooth firmware after installing Stage 2a-2 or later.

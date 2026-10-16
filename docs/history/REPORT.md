@@ -1155,3 +1155,158 @@ Earlier sections are unchanged. §27 item 5 recorded the 15° base as "currently
 | Matrix | macOS USB: YOUTUBE / SPINNER PASS; macOS BLE: YOUTUBE / SPINNER (movement, drag) PASS; Windows USB and ChromeOS USB: YOUTUBE / SPINNER (pointer) PASS (`STAGE_2A_2.md` §9) |
 | Not verified | BLE on Windows and ChromeOS; drag on Windows / ChromeOS; OS versions not recorded; ChromeOS is not taken as evidence for general Linux distributions |
 | Files | Documentation only |
+
+## 60. Development entry — 2026-10-16: Stage 2a-3 design and step 1 (KEY STEP, ext record)
+
+| Item | Record |
+| --- | --- |
+| Decisions (Edgar) | KEY STEP (key inputs per detent, 1–10, per profile 1/3/4) and SPINNER SENS separated; Fn+5 `C-SPINNER` (own SENS, direction, custom button, default mouse left HOLD); FIFO on reversal; up to 10 taps per loop provisionally; backlog limit decided after USB / BLE measurement; three steps, folder `MediaJog_2a_3`, build id `2a-3`. Tap counts are guaranteed for normally processed detents only (`STAGE_2A_3_DESIGN.md`) |
+| Step 1 | KEY STEP with per-entry tap counts (KEY STEP 1 = the 2a-2 path), `Fn+;` / `Fn+.` per current key profile, new NVS record `mediajog/ext` (`cfg` unchanged), display of KEY STEP and measurement counters |
+| Tests | 2a suite 85/85, 2a-2 scenarios 32/32, NVS 47/47, HOLD 16/16, KEY STEP 35/35; differential KEY STEP 1 vs 2a-2 identical (1,711 USB / 1,725 BLE reports); rollback to 2a-2 restores settings; 10 mutants detected; GATT identical to B1 |
+| Build | Exit 0, 0 sketch warnings; source `a9313f27…`, app-only binary (891,744 B) `9f222fc42248f3235eabdc013c8db2455696553b119d6dfe783ff4287e48c7e6` |
+| Next | Edgar's review, then the step-1 hardware check (`STAGE_2A_3.md` §4). Step 2 only after that |
+
+## 61. Development entry — 2026-10-16: Stage 2a-3 step 1 — BLE at KEY STEP 10 lags after fast rotation (analysis)
+
+| Item | Record |
+| --- | --- |
+| Hardware (author) | USB KEY STEP 10: fine. BLE: KEY STEP 1 fine; KEY STEP 10 at fast rotation: frame stepping continues after stopping, YouTube spinner. Screen: `P100 D428`, `W298 T22`, `FAIL0`, `fail10`, `.4067 ,2452` |
+| Analysis | One BLE tap took up to 22 ms (`T22`), so sending blocks for about one connection interval per notification. Estimated BLE rate about 40–50 taps/s versus about 250 over USB. The delay comes mainly from the 100-tap firmware queue (about 2 s). Drops were whole detents, as specified. `fail10` = USB mouse reports with unknown outcome, unrelated. The loop was blocked up to 298 ms |
+| Proposal | Diagnostic build first (rate, delay, `notifyFails`); then a BLE-only time-based backlog limit and a BLE-only taps-per-loop limit. USB, KEY STEP 1 and BLE GATT unchanged (`STAGE_2A_3.md` §5) |
+| Next | Edgar's decision; C-SPINNER (step 2) remains on hold |
+
+## 62. Development entry — 2026-10-16: Stage 2a-3 diagnostic build d1 (BLE send measurement)
+
+| Item | Record |
+| --- | --- |
+| Request (author / Edgar) | Diagnostic build first: BLE tap rate, press / release notify times, where sending waits, pending taps, tail after stopping; minimal influence of the measurement; no change to USB, KEY STEP 1, BLE connection, NVS. Goal: drop as little as possible, accurate rotation, low delay. B + C later; C-SPINNER on hold |
+| Build | `MediaJog_2a_3_d1/` (`2a-3d1`, tag `2a3d`): `micros()` timing of allocation and notify (press / release separately), min free msys, BLE rejects, connection interval, 1 s and burst tap rates, pending taps, tail, draw time; two status lines in BLE PROFILE 1 / 3; `[DIAG]` Serial line per burst |
+| Tests | 2a suite 85/85, 2a-2 scenarios 32/32, KEY STEP 35/35, diagnostics 12/12; differential d1 vs 2a-3 identical (31,086 reports, random KEY STEP changes); GATT identical to B1 |
+| Build | Exit 0, 0 sketch warnings; source `d2f20561…`, app-only binary (893,152 B) `714f034c22310f567b4ad9c3108338d6e113321162b8835e2647276636d231a9` |
+| Next | Measurement on hardware (`STAGE_2A_3.md` §6.4), then the decision on B + C and on the connection interval |
+
+## 63. Development entry — 2026-10-16: d1 BLE results analysed
+
+| Item | Record |
+| --- | --- |
+| Hardware (author / Edgar) | BLE KEY STEP 10: about 70 taps/s peak, `ci` 15 ms, tail max 1,554 ms, `P100 D632 n1250`, notify times about 0 ms; felt delay after stopping similar to USB; YouTube spinner more frequent on BLE |
+| Analysis | Notify call is non-blocking (the §5 "blocking" hypothesis is refuted). `n` counts the stack's flow-control rejections, about one per loop under a backlog; every rejection is retried, no input lost. About 2.1 notifications per connection event is the link rate. The tail is the firmware queue draining at that rate, plus an estimated ≤ 0.25 s in the host pool; it is bounded by the 100-tap limit (`STAGE_2A_3.md` §7) |
+| Proposal | Keeping 2a-3 is acceptable. If improved: stack-aware pacing for BLE / KEY STEP ≥ 2 and rejection counting without printing (no drops, low risk); PHY / connection interval only as a separate experiment; a shorter queue limit last |
+| Next | Edgar's decision; no code change |
+
+## 64. Development entry — 2026-10-16: direction reversal during fast rotation — design review
+
+| Item | Record |
+| --- | --- |
+| Observation (author) | BLE, KEY STEP 10: after fast right rotation and an abrupt left turn, right frame stepping continues for a noticeable time |
+| Cause (source) | FIFO queue plays all queued old-direction detents first (up to 100 taps ≈ 1.4 s) and, at the limit, drops the new direction's detents; accepted notifications in the BLE stack (estimated ≤ 0.25 s) cannot be recalled |
+| Recommendation | C: reversal purge of queued old-direction rotation (KEY STEP ≥ 2; keeps PRESS / HOLD order; new detent then admitted) + BLE-only stack-aware pacing (keeps the stack backlog to about 3 taps). KEY STEP 1, USB at KEY STEP 1, HOLD, NVS, GATT unchanged (`STAGE_2A_3_DESIGN.md` §7) |
+| Next | Author / Edgar decide; no code change |
+
+## 65. Development entry — 2026-10-16: Stage 2a-3 r2 — reversal purge (method A)
+
+| Item | Record |
+| --- | --- |
+| Decision (author / Edgar) | Method C as the goal; this round method A only (purge waiting old-direction rotation at a reversal), KEY STEP 2–10, all key profiles incl. CUSTOM, USB and BLE; KEY STEP 1 and everything else unchanged. Pass criterion on hardware: "fast right, then left: it moves left" |
+| Implementation | `MediaJog_2a_3_r2/` (`2a-3r2`, tag `2a3r`): `newestQueuedRotation()` + `purgeRotation()` called in `pushDetent()` before the CUSTOM / limit checks; PRESS / HOLD kept in order; taps stay atomic; diagnostics V / X / q. Only `pushDetent`, `drawStatus`, `drawCustomStatusBody` changed |
+| Tests | 2a 85/85, 2a-2 32/32, KEY STEP 34/35 (K05 = the replaced FIFO-on-reversal expectation), KEY STEP 1 differential identical (10,531 reports), reversal tests 21/21, 6 mutants detected; GATT identical to B1 |
+| Build | Exit 0, 0 sketch warnings; source `579dd306…`, app-only binary (892,096 B) `a4ea24fd3f01243e62e34b1f30c50d101b06445d61d1fde5023a94bb4fe8e6af` |
+| Next | Edgar's review, then the hardware evaluation (`STAGE_2A_3_DESIGN.md` §8); method B only if the residual old-direction movement on BLE still feels wrong |
+
+## 66. Development entry — 2026-10-16: r2 — no BLE input on hardware (investigation)
+
+| Item | Record |
+| --- | --- |
+| Hardware (author) | r2 BLE: Mac connected, `BLE READY`, rotation value changes, but no key reaches the Mac (rotation and knob press); re-pairing did not help. USB works |
+| Source | Only `pushDetent()` (KEY STEP ≥ 2 rotation) and two display functions changed; the BLE send path, input path, link / switch logic and GATT are byte-identical to 2a-3. The knob press (`pushEvent(EV_PRESS)`) does not touch the new code, and the purge sets no flag that blocks sending. `BLE READY` = `linkState` (connected + encrypted + keyboard CCCD); sending also needs `hidReady`; `txCount` shows accepted reports |
+| Judgment | Not determined; no r2-specific path found. Candidates: `hidReady` false, all notifications refused, or reports not used by the Mac |
+| Next | Status-screen photo after KEY STEP 1 rotation + knob press in BLE; CONNECTION screen photo; if needed, the same test with 2a-3 (`STAGE_2A_3_DESIGN.md` §9) |
+
+## 67. Development entry — 2026-10-16: r2 BLE investigation — photos show reports accepted on the device
+
+| Item | Record |
+| --- | --- |
+| Photos (author) | Status: `BLE READY`, `.760 ,811 k9`, `TX k`, `SKIP0 q0`, no `REL!`, `V8 X399`, KEY STEP 1. CONNECTION: `bond=1 kb=1 ms=1 h1 fs0`, `ki10 ko21 mi24`, USB mounted (inactive) |
+| Analysis | `TX` / counters are set only for `TAP_SENT` = BLE host accepted the notification (incl. the knob press). The firmware path works; the loss is after the stack accepts (link or Mac). This path is identical to 2a-3 / d1. The written summary (counters 0, V0) differs from the photo; counters are cumulative since boot |
+| Next | Install d1 (or 2a-3) and repeat the TextEdit test; if it also fails, Mac Bluetooth off / on, then Mac restart, without unpairing (`STAGE_2A_3_DESIGN.md` §9.1) |
+
+## 68. Development entry — 2026-10-16: d1 works, r2 does not (same Mac) — candidates
+
+| Item | Record |
+| --- | --- |
+| Observation | d1: no input at first, works after Mac re-pairing. r2: re-paired, `BLE READY`, no input |
+| Source / build | Init order and all BLE code identical in 2a-3 / d1 / r2; r2 adds two counters and longer tags (no overflow); d1 changes more and works |
+| Candidates | A Mac / link state (d1 showed the same symptom before re-pairing); B r2-specific runtime effect (no source evidence); C reports not sent on the link; D wrong upload |
+| Tests | Fresh link via USB → BLE switch without unpairing (+ trace photo); Mac Bluetooth off / on, Mac restart; repeatability 2a-3 vs r2; diagnostic r2 only if B is likely (`STAGE_2A_3_DESIGN.md` §9.2) |
+
+## 69. Development entry — 2026-10-16: r2 (method A) passes on hardware; method B not implemented
+
+| Item | Record |
+| --- | --- |
+| Hardware (author) | BLE YouTube: fast rotation with an abrupt reversal feels good; BLE TextEdit follows reversals; USB KEY STEP 10: `。` switches to `、` correctly on reversal |
+| Decision | Method A meets the pass criterion; method B (BLE pacing) is not implemented; `MediaJog_2a_3_r2` is kept (`579dd306…` / `a4ea24fd…`); 2a-3 and d1 preserved |
+| Open issue | "`BLE READY` without input" (seen with d1 before re-pairing and once with r2): cause not determined, kept as an open issue with the capture procedure (`STAGE_2A_3_DESIGN.md` §10) |
+| Files | Documentation only; no code change, no build |
+
+## 70. Development entry — 2026-10-16: r2 additional hardware tests
+
+| Item | Record |
+| --- | --- |
+| Hardware (author) | BLE KEY STEP 1 (YOUTUBE): right / left / press as before — PASS. BLE CUSTOM (CW Right, CCW Left, BTN Shift HOLD): turning left and right while holding — PASS |
+| Not verified | A new knob press during a reversal; long-term continuous use |
+| Status | r2 current; method A verified; method B not implemented; "`BLE READY` without input" open. No code change |
+
+## 71. Development entry — 2026-10-16: web MAME Arkanoid works with the existing SPINNER
+
+| Item | Record |
+| --- | --- |
+| Setup | Cardputer ADV + U135, `MediaJog_2a_3_r2` (unchanged), SPINNER (Fn+2), BLE, Mac, Google Chrome; Internet Archive web MAME, Arkanoid Tournament (US) (https://archive.org/details/arcade_arkatour); MAME: Dial Analog = Mouse X, Inc = RIGHT, Dec = LEFT |
+| Hardware (author) | Mouse output OK; paddle moves left / right; speed: "no problem at all"; responsiveness: no practical problem; smoothness: slightly stepped; no firmware change needed |
+| Mouse input | At first the Mac pointer moved but the paddle did not. Working method: reload the page, then before starting the game run `javascript:MAMELoader.extraArgs=(z)=>({extra_mame_args:['-mouse']});AJS.emulate()` from the address bar (in Chrome, `javascript:` typed by hand, the rest pasted). Depends on the Internet Archive's page code; may stop working. Reference: Alexander Pruss, "Two tweaks for Internet Arcade games on archive.org" (2023) |
+| Pointer | After the game the Mac pointer stayed hidden; **Esc once restores it** (hardware-verified). Must be part of any published procedure |
+| Stepped movement | Cause not determined (encoder resolution, firmware movement conversion, web MAME input handling are candidates only). No firmware change now: speed and responsiveness have priority |
+| Decisions | SPINNER SENS kept; Fn+2 settings and behavior unchanged; C-SPINNER stays a general customizable SPINNER (not Arkanoid-specific), not started (`STAGE_2A_3_DESIGN.md` §12) |
+| Files | Documentation only; no code change, no build |
+
+## 72. Development entry — 2026-10-16: Arkanoid test — SPINNER SENS 64
+
+| Item | Record |
+| --- | --- |
+| Hardware (author) | The successful web MAME Arkanoid test (§71) used SPINNER SENS **64**: speed no problem, responsiveness sufficient, slightly stepped movement |
+| Use | Baseline for later comparison tests; firmware default unchanged (`STAGE_2A_3_DESIGN.md` §12.5) |
+| Files | Documentation only; no code change, no build |
+
+## 73. Development entry — 2026-10-16: Stage 2a-4 — C-SPINNER (PROFILE 5) implemented; not hardware-tested
+
+| Item | Record |
+| --- | --- |
+| Request | Author: Stage 2A-4, C-SPINNER on Fn+5 (general, not Arkanoid-specific); Fn+1–4, KEY STEP / reversal purge, USB / BLE and NVS data unchanged |
+| Review | Design, plan, report, r2 source and NVS checked. 64 = step 12 of the 14-step table (consistent). Default = PROFILE 2's default 8, not 64. Design §4 "ok toggles DIR" conflicts with ok = SAVE: kept ok = SAVE, DIR toggled with `2` / knob press (to confirm). SENS and MODE also added as SETUP rows (request) |
+| Build | `MediaJog_2a_4/`, tag `2a4`: no errors, no warnings; source `fc17bf73…`, bin `4e1dc5ed…`. r2 checksums verified unchanged |
+| Code | 132 of 148 functions identical to r2; 16 extended for PROFILE 5; 19 new. `ext` v1 format unchanged; `cfg` never holds 5; PROFILE 5 restored at boot only with the `cfg` check. GATT identity PASS |
+| Host tests | New suite 80/80 (incl. sensitivity 64 producing exactly the PROFILE 2 reports at 64); earlier suites as r2; 10/10 mutants detected |
+| Not verified | All hardware behaviour of 2a-4 (`STAGE_2A_4.md` §9); suggested checks in §10 |
+| Files | `MediaJog_2a_4/` (new), `docs/STAGE_2A_4.md` (new); appended: REPORT, DEVELOPMENT_PLAN, STAGE_2A_3_DESIGN |
+
+## 74. Development entry — 2026-10-16: Stage 2a-4 hardware tests (author)
+
+| Item | Record |
+| --- | --- |
+| Setup | `MediaJog_2a_4` (`4e1dc5ed…`), Cardputer ADV, Mac |
+| BLE | Fn+2 and Fn+5 pointer PASS; Fn+5 at 8 and 64 PASS; sensitivities independent PASS (Fn+5 8 → 64 left Fn+2 at 64; at 64 both moved about the same by feel) |
+| Direction | NORMAL → REVERSE, saved, reversed, kept after profile switch and power cycle: PASS |
+| Mouse button | L → R, right click, TAP / HOLD, three TAP right clicks, TAP L no drag, HOLD L drag: PASS |
+| Keys | A, HOLD A (macOS accent menu in English input, "あああああ" in Japanese input: the computer's normal held-key behaviour), TAP A held = one character, Shift+A = capital A, NONE: PASS |
+| NVS / USB | REVERSE and 64 kept after power cycle; Fn+5 pointer over USB: PASS |
+| Not covered | Arkanoid with Fn+5; Windows / ChromeOS; Fn+5 button / keys over USB; long-term use; "`BLE READY` without input" still open (`STAGE_2A_4.md` §11) |
+
+## 75. Development entry — 2026-10-16: Stage 2a-5 — colour-coded operation guides; not hardware-tested
+
+| Item | Record |
+| --- | --- |
+| Change | Display only: operation cyan, description white in every guide (SPINNER, CUSTOM, C-SPINNER, both SETUPs and their edit screens, CONNECTION); status, values, selections and warnings unchanged |
+| Code | 162 of 167 functions identical to 2a-4; 5 drawing functions changed, `printGuide()` new; GATT identity PASS |
+| Build | `MediaJog_2a_5/`, tag `2a5`: no errors, no sketch warnings; source `20a3659b…`, bin `4093c047…`. 2a-4 checksums verified unchanged |
+| Host tests | All earlier suites as on 2a-4; display comparison 270/270 (same characters and positions, colour changes only on guide lines) |
+| Not verified | The display on the device (`STAGE_2A_5.md` §7–§8) |
+| Files | `MediaJog_2a_5/` (new), `docs/STAGE_2A_5.md` (new); appended: STAGE_2A_4 §11, REPORT, DEVELOPMENT_PLAN. Public repository prepared, not committed |

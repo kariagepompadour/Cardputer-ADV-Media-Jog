@@ -8,8 +8,8 @@
 
 ## Install the firmware (tested path)
 
-1. Download the **app-only** file `firmware/MediaJog_2a_2/MediaJog_2a_2.ino.bin`.
-2. Check it. From the `firmware/MediaJog_2a_2` folder:
+1. Download the **app-only** file `firmware/MediaJog_2a_5/MediaJog_2a_5.ino.bin`.
+2. Check it. From the `firmware/MediaJog_2a_5` folder:
 
    ```bash
    shasum -a 256 -c SHA256SUMS.txt
@@ -28,7 +28,7 @@
 
 ## USB-only alternative
 
-`firmware/MediaJog_1e_4/MediaJog_1e_4.ino.bin` is the USB-only firmware with the same four profiles and saved settings. It is installed the same way.
+`firmware/MediaJog_1e_4/MediaJog_1e_4.ino.bin` is the USB-only firmware with the first four profiles (no C-SPINNER, no KEY STEP) and saved settings. It is installed the same way.
 
 ## Building from source
 
@@ -44,10 +44,10 @@
 With arduino-cli:
 
 ```bash
-arduino-cli compile --fqbn "m5stack:esp32:m5stack_cardputer:USBMode=default,CDCOnBoot=cdc" --output-dir build firmware/MediaJog_2a_2
+arduino-cli compile --fqbn "m5stack:esp32:m5stack_cardputer:USBMode=default,CDCOnBoot=cdc" --output-dir build firmware/MediaJog_2a_5
 ```
 
-The app-only file is `build/MediaJog_2a_2.ino.bin`. In the Arduino IDE, use **Sketch → Export Compiled Binary** and install the `.ino.bin` through the launcher.
+The app-only file is `build/MediaJog_2a_5.ino.bin`. In the Arduino IDE, use **Sketch → Export Compiled Binary** and install the `.ino.bin` through the launcher.
 
 A build on your machine is not guaranteed to be byte-identical to the provided file. The provided file is the one that was tested.
 

@@ -423,6 +423,8 @@ Known constraints from the source review (REPORT §11; none tested on hardware):
 
 Investigate shortcuts for video/audio editors and test individual emulators/cores (e.g., RetroArch with mouse-capable mappings) without assuming generic compatibility. Distinguish relative spinner input from absolute-position paddle controls and gamepad axes. Use lawfully obtained game content.
 
+> **Update 2026-10-16 (hardware, author):** Arkanoid Tournament (US) in the Internet Archive web MAME is playable with the **existing SPINNER (Fn+2)** over BLE on a Mac (Chrome), firmware `MediaJog_2a_3_r2` unchanged. Mouse input had to be enabled with MAME's `-mouse` option (address-bar JavaScript; depends on the Internet Archive's page code). Esc once restores the hidden Mac pointer afterwards. Speed and responsiveness good; movement slightly stepped (cause not determined; no firmware change now). Details: `STAGE_2A_3_DESIGN.md` §12, REPORT §71.
+
 ### Phase 5 — Modular hardware ecosystem
 
 After validating mechanical fit and operation, release multiple printable mounts and potentially swappable controller accessories. Do not sacrifice the successful compact form factor solely to accommodate speculative button layouts.
@@ -457,7 +459,11 @@ Cardputer-Media-Jog/
 │   ├── BLE_B1_DESIGN.md       # Proposal B design (one HID service, NimBLE C API)
 │   ├── BLE_B1.md              # BLE-B1: hardware PASS
 │   ├── STAGE_2A_2_DESIGN.md   # Stage 2a-2 integration design and decisions
-│   └── STAGE_2A_2.md          # Stage 2a-2: hardware results (macOS §7–§8; Windows / ChromeOS USB §9), unverified items, known open issues
+│   ├── STAGE_2A_2.md          # Stage 2a-2: hardware results (macOS §7–§8; Windows / ChromeOS USB §9), unverified items, known open issues
+│   ├── STAGE_2A_3_DESIGN.md   # Stage 2a-3: KEY STEP, Fn+5 C-SPINNER, ext record (three steps)
+│   ├── STAGE_2A_4.md          # Stage 2a-4: C-SPINNER (PROFILE 5) implemented; host-tested, not hardware-tested
+│   ├── STAGE_2A_5.md          # Stage 2a-5: colour-coded operation guides (display only); host-tested, not hardware-tested
+│   └── STAGE_2A_3.md          # Stage 2a-3 step 1: built, host-tested, not hardware-tested
 ├── U135_Probe/                # Encoder probe v2 (moved from the root by 2026-10-13). Source has an attribution-only comment fix (SHA-256 3bb64b72…); binary unchanged (REPORT §28)
 │   ├── U135_Probe.ino
 │   └── U135_Probe.ino.bin
@@ -484,6 +490,11 @@ Cardputer-Media-Jog/
 ├── MediaJog_BLE_M1_r2/        # BLE-M1 r2: mouse service registered before the GATT server start (tag BM1r2): hardware: ms c0 (Mac did not subscribe)
 ├── MediaJog_BLE_B1/           # Proposal B: one HID service, static NimBLE GATT table (tag BB1): hardware PASS (2026-10-14)
 ├── MediaJog_2a_2/             # Stage 2a-2: Stage 2a + BLE-B1 GATT table (tags USB 2a2 / BLE 2a2): main functions hardware-verified; 2 known open issues
+├── MediaJog_2a_3/             # Stage 2a-3 step 1: KEY STEP + NVS ext record (tags USB 2a3 / BLE 2a3): hardware: USB OK; BLE KEY STEP 10 lags at fast rotation
+├── MediaJog_2a_3_d1/          # Stage 2a-3 diagnostic build d1 (BLE send measurement, tag 2a3d): hardware-measured
+├── MediaJog_2a_3_r2/          # Stage 2a-3 r2: reversal purge for KEY STEP 2–10 (tag 2a3r): CURRENT; reversal behavior hardware-verified (BLE / USB)
+├── MediaJog_2a_4/             # Stage 2a-4: Fn+5 C-SPINNER on top of r2 (tag 2a4): built and host-tested, NOT hardware-tested; r2 stays the verified base
+├── MediaJog_2a_5/             # Stage 2a-5: 2a-4 with colour-coded guides (tag 2a5): built and host-tested, NOT hardware-tested; release candidate for GitHub after the author's display check
 └── evidence/                  # Investigation materials; third-party images kept local (see .gitignore)
 ```
 
@@ -525,6 +536,16 @@ Cardputer-Media-Jog/
    - **Stage 2a-2 hardware test 1 (2026-10-14):** USB and BLE YouTube operation and both switch directions PASS. Open: the B1 bond was not taken over (new pairing needed), USB first `NOT MOUNTED`; BLE mouse untested (`STAGE_2A_2.md` §7).
    - **Stage 2a-2: main functions hardware-verified (2026-10-14)**: BLE mouse movement and drag, BLE → USB switch while dragging, restart in USB mode also PASS. Not exhaustive (`STAGE_2A_2.md` §8.3). Known open issues: B1 bond not reused, first USB recognition failed (§8.4).
    - **Stage 2a-2 on Windows and ChromeOS (2026-10-14):** USB, YOUTUBE and SPINNER (pointer) PASS on both. BLE on these OSs not verified; ChromeOS is not evidence for general Linux (`STAGE_2A_2.md` §9).
+   - **Stage 2a-3 step 1 (2026-10-16):** KEY STEP (1–10 per key profile) and the `ext` NVS record built and host-tested (KEY STEP 1 output identical to 2a-2). Waiting for review and the hardware check (`STAGE_2A_3.md` §4); steps 2–3 (Fn+5 C-SPINNER) not started.
+   - **Stage 2a-3 hardware (2026-10-16):** USB KEY STEP 10 fine; BLE KEY STEP 10 lags after fast rotation (`P100 D428`, `T22`). Diagnostic build d1 ready for measurement (`STAGE_2A_3.md` §5–§6). C-SPINNER on hold.
+   - **Stage 2a-3 r2 (2026-10-16):** reversal purge (method A) built and host-tested; hardware evaluation pending (`STAGE_2A_3_DESIGN.md` §8). BLE pacing (method B) decided afterwards.
+   - **Stage 2a-3 r2 hardware (2026-10-16):** reversal purge passes over BLE and USB; method B not implemented; r2 kept as the current build. Open issue: `BLE READY` without input (cause not determined, `STAGE_2A_3_DESIGN.md` §10). C-SPINNER (step 2) still on hold.
+   - **r2 additional tests (2026-10-16):** BLE KEY STEP 1 and BLE CUSTOM HOLD with reversals PASS. Not verified: a knob press during a reversal, long-term use.
+   - **Web MAME Arkanoid (2026-10-16):** the existing SPINNER (Fn+2, r2, BLE, Mac Chrome) plays Arkanoid Tournament with MAME `-mouse`; Esc restores the pointer; slightly stepped movement, cause not determined. Decisions: SPINNER SENS kept; Fn+2 settings and behavior unchanged; C-SPINNER (Fn+5) stays a general customizable SPINNER (own SENS, direction, key / mouse L / R button, TAP / HOLD, saved), not Arkanoid-specific, not started; Fn+2 unchanged is its top priority (`STAGE_2A_3_DESIGN.md` §12).
+   - **Arkanoid baseline (2026-10-16):** SPINNER SENS **64** in that test (speed fine, slightly stepped); baseline for later comparisons (`STAGE_2A_3_DESIGN.md` §12.5).
+   - **Stage 2a-4 (2026-10-16): C-SPINNER (Fn+5) implemented** in `MediaJog_2a_4/` (source `fc17bf73…`, bin `4e1dc5ed…`): own sensitivity (same 14 steps, default 8), direction, button key / mouse L / R / none with TAP / HOLD, SETUP, `ext` storage. Build OK, no warnings; host tests 80/80 + earlier suites as r2. **Not hardware-tested.** r2 kept unchanged as the verified base. UI points to confirm: DIR toggled with `2` / knob press (`ok` = SAVE), SENS also in SETUP (`STAGE_2A_4.md` §2, §10).
+   - **Stage 2a-4 hardware (2026-10-16): PASS** on the author's checks (BLE pointer on Fn+2 / Fn+5, independent sensitivities 8 / 64, direction incl. power cycle, mouse L / R TAP / HOLD, key A TAP / HOLD, Shift+A, NONE, NVS, USB pointer; `STAGE_2A_4.md` §11). Note: the tree line above ("NOT hardware-tested") predates this result. Not covered: Arkanoid with Fn+5, Windows / ChromeOS, long-term use.
+   - **Stage 2a-5 (2026-10-16):** colour-coded operation guides (cyan operation, white description), display code only; build OK; host tests as 2a-4 plus display comparison 270/270. **Not hardware-tested.** Public repository files prepared (`firmware/MediaJog_2a_5`, README, guides), not committed; commit / push by the author after the display check (`STAGE_2A_5.md`).
    - **Stage 2a code review 1 (2026-10-13):** owed-release completion limited to all-up / button-up reports; 85/85 end-to-end checks. Ready for the hardware test (`STAGE_2A.md` §7; binary `0b0dfc44…`).
    - **Stage 2a implemented (2026-10-13):** `MediaJog_2a/`, built and host-tested (66 end-to-end checks; `docs/STAGE_2A.md`). Next: Edgar's code review, then the §7 hardware checklist there.
    - **BLE-1 r4 passed on hardware (2026-10-13); Stage 2a design written** (`docs/STAGE_2A_DESIGN.md`). Next: Edgar's design review and decisions D1–D8; then implementation in `MediaJog_2a/`.
