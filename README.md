@@ -81,7 +81,7 @@ Select a profile with `Fn + 1` … `Fn + 5` on the Cardputer. The profile is sav
 - **Sensitivity and KEY STEP:** `Fn + ;` (up) and `Fn + .` (down).
   - In **SPINNER** and **C-SPINNER**: the pointer movement per knob step, 14 steps from 1 to 128 (default 8). Each of the two profiles keeps its own value.
   - In **YOUTUBE**, **EDITING** and **CUSTOM**: **KEY STEP**, how many key presses one knob step sends (1–10, default 1), one value per profile. When you reverse direction, presses still waiting in the other direction are dropped, so the knob follows you.
-- **EDITING** sends common editing shortcuts. It is **not** tested with any video editor, and no compatibility is claimed.
+- **EDITING** sends common editing shortcuts. In **Adobe Premiere Pro** on macOS, the three basic controls were checked over USB and Bluetooth LE: turning moves the playhead forward / back, and pressing the knob plays / pauses (see [Tested platforms](#tested-platforms-and-results)). Other Premiere Pro functions and other video editors are **not** tested, and full compatibility with Premiere Pro or any other editor is not claimed.
 - **CUSTOM** is set up on the Cardputer with `Fn + S` (in Profile 4): an ordinary key with Ctrl / Shift / Alt / Command (GUI). The press can be TAP or HOLD; for example, HOLD Shift + turn selects text.
   - SETUP画面のアルファベットはキー名として大文字で表示されます。実際に大文字を入力するには、Shift修飾キーを追加してください。
   - (Letters on the SETUP screen are key names. To type a capital letter, add the Shift modifier.)
@@ -135,10 +135,21 @@ Tested by the author on real hardware. **Stage 2a-5** (the firmware above) is St
 - automatic Bluetooth LE reconnection after turning the Mac's Bluetooth off and on, and after restarting the Cardputer (once each);
 - USB reconnection after restarting the Cardputer in USB mode.
 
+**Adobe Premiere Pro** on macOS (MacBook Pro, Apple Silicon), profile **EDITING** (`Fn + 3`):
+
+| Action | USB | Bluetooth LE |
+| --- | --- | --- |
+| Turn clockwise: playhead moves forward | ✅ | ✅ |
+| Turn counterclockwise: playhead moves back | ✅ | ✅ |
+| Press the knob: play / pause | ✅ | ✅ |
+
+Only these three basic controls were checked. Other Premiere Pro functions, workflows and keyboard-shortcut settings were not tested.
+
 **Not tested yet:**
 - C-SPINNER and KEY STEP on Windows and ChromeOS; Bluetooth LE on Windows and ChromeOS;
 - dragging on Windows and ChromeOS;
-- serious jog use in video editors such as Premiere Pro or DaVinci Resolve;
+- video editors other than Premiere Pro, such as DaVinci Resolve; in Premiere Pro, anything beyond the three basic EDITING controls above (for example, longer editing sessions or other functions);
+- EDITING in Premiere Pro on Windows;
 - Linux distributions (ChromeOS is **not** taken as evidence for them);
 - long-term stability;
 - other computers and OS versions.
