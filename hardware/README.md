@@ -3,8 +3,8 @@
 | File | What it is | Size (bounding box) | Printed? |
 | --- | --- | --- | --- |
 | `Cardputer-ADV-Media-Jog.3mf` | Bambu Studio project with all three parts, made for a Bambu Lab A1 mini (0.4 mm nozzle, "0.20mm Standard" profile) | — | **Yes**: the author printed and used these parts |
-| `MediaJog_Base_A.stl` | **Flat base** | 54.0 × 128.0 × 19.0 mm | No (exported from the 3MF) |
-| `MediaJog_Base_B.stl` | **15° tilted base** | 57.2 × 128.0 × 26.8 mm | No (exported from the 3MF) |
+| `MediaJog_Base_A.stl` | **Flat base** | 54.0 × 133.0 × 19.0 mm | No (exported from the 3MF) |
+| `MediaJog_Base_B.stl` | **15° tilted base** | 57.2 × 133.0 × 26.7 mm | No (exported from the 3MF) |
 | `MediaJog_Dial.stl` | **Jog dial** (large knob for the U135) | 30.0 × 30.0 × 15.0 mm | No (exported from the 3MF) |
 
 - **The 3MF is the tested source.** The STL files were exported from it but **have not been printed**. Print **one** base, flat or tilted, and the dial.
