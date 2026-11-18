@@ -4,7 +4,7 @@
   Base:   m5stack/M5Unit-Encoder  examples/Unit_Encoder_M5Core2/Unit_Encoder_M5Core2.ino
           Original example: Copyright (c) 2021 by M5Stack.
           Licensed under the MIT License; see LICENSES/M5Stack-MIT.txt.
-  Modifications: Copyright (c) 2026 kariagepompadour. MIT License; see LICENSE.
+  Modifications: Copyright (c) 2026 Kariage POMPADOUR Entertainment Corporation. MIT License; see LICENSE.
   Display init: copied from SOUND TERRARIUM setup() (proven on this Cardputer ADV)
 
   Scope (only):

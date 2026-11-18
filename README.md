@@ -211,7 +211,7 @@ Troubleshooting: [`docs/guide/troubleshooting.md`](docs/guide/troubleshooting.md
 
 ## License and credits
 
-- **License:** all original project materials (firmware sources, 3D-print designs, documentation, photos) are released under the [MIT License](LICENSE), Copyright (c) 2026 kariagepompadour.
+- **License:** all original project materials (firmware sources, 3D-print designs, documentation, photos) are released under the [MIT License](LICENSE), Copyright (c) 2026 Kariage POMPADOUR Entertainment Corporation.
 - **Third-party material** keeps its own license and is not claimed as this project's:
   - M5Stack's libraries (M5Unified, M5GFX, M5Unit-Encoder, M5Cardputer; MIT). M5Stack-derived code in this repository is covered by [`LICENSES/M5Stack-MIT.txt`](LICENSES/M5Stack-MIT.txt).
   - The Arduino-ESP32 core (mixed licenses, including LGPL-2.1 and Apache-2.0).
